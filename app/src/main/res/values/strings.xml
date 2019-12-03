@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Scancer</string>
+    <string name="title_activity_picture_taken">PictureTaken</string>
+    <string name="title_activity_main_menu">MainMenu</string>
+    <string name="title_activity_results">Results</string>
+</resources>
