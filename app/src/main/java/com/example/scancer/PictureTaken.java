@@ -85,10 +85,7 @@ public class PictureTaken extends AppCompatActivity {
                     System.out.println("Error when setting up streams, " + e);
                 }
 
-                Intent newIntent = new Intent(PictureTaken.this, Results.class);
-                newIntent.putExtra("currentPhotoPath", currentPhotoPath);
-                startActivity(newIntent);
-                finish();
+
             }
         });
     }
@@ -96,13 +93,17 @@ public class PictureTaken extends AppCompatActivity {
     private void makeJsonObjReq(String encodedString) {
         System.out.println("Making object request.");
         RequestQueue queue = Volley.newRequestQueue(PictureTaken.this);
-        String URL = "PUT_SERVER_URL_HERE";
+
+        /*Put server URL here. */
+        String URL = "http://127.0.0.1/post";
         JSONObject jsonObj = new JSONObject();
+
         try {
-            jsonObj.put("imageCode", encodedString);
+            jsonObj.put("img", encodedString);
         } catch (Exception e) {
             System.out.println("jsonObject put error = " + e);
         }
+
         try {
             JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
                     URL, jsonObj,
@@ -110,7 +111,12 @@ public class PictureTaken extends AppCompatActivity {
 
                         @Override
                         public void onResponse(JSONObject response) {
-                            //start a new activity or something
+                            Intent newIntent = new Intent(PictureTaken.this, Results.class);
+                            newIntent.putExtra("currentPhotoPath", currentPhotoPath);
+                            newIntent.putExtra("type", response.getString(????));
+                            newIntent.putExtra("odds", response.getDouble(????));
+                            startActivity(newIntent);
+                            finish();
                             System.out.println("Server did the thing!");
                             System.out.println("Response = " + response);
                         }
@@ -123,7 +129,9 @@ public class PictureTaken extends AppCompatActivity {
             });
             queue.add(jsonObjReq);
             System.out.println("Request made.");
+
         } catch (Exception e) {
+
             System.out.println("exception error jsonobject error = " + e);
         }
 

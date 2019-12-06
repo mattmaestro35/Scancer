@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,6 +23,14 @@ public class Results extends AppCompatActivity {
 
         ImageView picturePreview = findViewById(R.id.pictureView);
         Intent myIntent = getIntent();
+        String type = myIntent.getStringExtra("type");
+        double odds = myIntent.getDoubleExtra("odds", 0);
+        double roundedOdds = Math.round(100.0 * odds) / 100.0;
+        String output = type + " : " + roundedOdds + " %";
+
+        TextView resultsText = findViewById(R.id.resultText);
+        resultsText.setText(output);
+
         String currentPhotoPath = myIntent.getStringExtra("currentPhotoPath");
         System.out.println("currentPhotoPath = " + currentPhotoPath);
         Bitmap imageBitmap = BitmapFactory.decodeFile(currentPhotoPath);
