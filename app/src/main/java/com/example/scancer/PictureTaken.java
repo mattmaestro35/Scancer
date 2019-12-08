@@ -39,6 +39,7 @@ public class PictureTaken extends AppCompatActivity {
         Intent myIntent = getIntent();
         currentPhotoPath = myIntent.getStringExtra("imagePath");
         setPicDisplay();
+
         Button noUpload = findViewById(R.id.noUpload);
         noUpload.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -40,8 +40,8 @@ public class Results extends AppCompatActivity {
         String output = "";
         TextView resultView = findViewById(R.id.resultView0);
         for (int i = 0; i < 7; i++) {
-            double odds = myIntent.getDoubleExtra("id" + i, 0);
-            double roundedOdds = Math.round(odds * 10) / 10;
+            double odds = 100 * myIntent.getDoubleExtra("id" + i, 0);
+            double roundedOdds = (double) Math.round(odds * 10) / 10;
             String type = types.get(i);
             String outputAdd = type + ": " + roundedOdds + "%" + "\n";
             output = output + outputAdd;
