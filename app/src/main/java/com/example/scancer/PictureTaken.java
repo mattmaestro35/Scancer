@@ -18,6 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -111,10 +112,19 @@ public class PictureTaken extends AppCompatActivity {
 
                         @Override
                         public void onResponse(JSONObject response) {
+
                             Intent newIntent = new Intent(PictureTaken.this, Results.class);
                             newIntent.putExtra("currentPhotoPath", currentPhotoPath);
-                            newIntent.putExtra("type", response.getString(????));
-                            newIntent.putExtra("odds", response.getDouble(????));
+                            try {
+                                JSONArray results = response.getJSONArray("results");
+                                for (int i = 0; i < results.length(); i++) {
+                                    double odds = results.getDouble(i);
+                                    newIntent.putExtra("id" + i, odds);
+                                }
+                            } catch (Exception e) {
+                                System.out.println("JSON response error = " + e);
+                            }
+
                             startActivity(newIntent);
                             finish();
                             System.out.println("Server did the thing!");

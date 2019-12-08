@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Results extends AppCompatActivity {
 
     @Override
@@ -23,11 +26,21 @@ public class Results extends AppCompatActivity {
 
         ImageView picturePreview = findViewById(R.id.pictureView);
         Intent myIntent = getIntent();
-        String type = myIntent.getStringExtra("type");
-        double odds = myIntent.getDoubleExtra("odds", 0);
-        double roundedOdds = Math.round(100.0 * odds) / 100.0;
-        String output = type + " : " + roundedOdds + " %";
+        List<String> types = new ArrayList<>();
+        types.add("Melanocytic nevi");
+        types.add("Melanoma");
+        types.add("Benign Keratosis");
+        types.add("Actinic Keratoses");
+        types.add("Dermatofibroma");
+        types.add("Vascular Skin Lesion");
+        types.add("Basal Cell Carcinoma");
 
+        //for (int i = 0; i < 7; i++) {
+            //double odds = myIntent.getDoubleExtra("id" + i, 0);
+            //textViews Loop
+        //}
+        double odds = myIntent.getDoubleExtra("id0", 0);
+        String output = odds + " " + odds + "%";
         TextView resultsText = findViewById(R.id.resultText);
         resultsText.setText(output);
 
