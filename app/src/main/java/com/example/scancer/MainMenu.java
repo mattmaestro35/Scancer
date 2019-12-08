@@ -25,31 +25,32 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
+import static java.text.DateFormat.getDateTimeInstance;
 
 public class MainMenu extends AppCompatActivity {
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
-
+    private String currentPhotoPath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_menu);;
+        setContentView(R.layout.activity_main_menu);
 
         /* Make button to take a picture */
-        ActivityCompat.requestPermissions(this,new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        ActivityCompat.requestPermissions(this,new String[] {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
         final Button tryExampleButton = findViewById(R.id.tryExample);
-
         tryExampleButton.setOnClickListener(new View.OnClickListener() {
         @Override
             public void onClick(View v) {
-
+            /* Convert example image to bitmap. */
             Bitmap testImg = BitmapFactory.decodeResource(MainMenu.this.getResources(),
                     R.drawable.examplepic1);
+            /* Save bitmap image. */
             File photoFile;
             try {
                 photoFile = createImageFile();
@@ -65,10 +66,11 @@ public class MainMenu extends AppCompatActivity {
                 testImg.compress(Bitmap.CompressFormat.PNG, 85, fOut);
                 fOut.flush();
                 fOut.close();
-            } catch (Exception e) { System.out.println("bad ex pic" + e); }
+            } catch (Exception e) {
+                System.out.println("Failed while making example picture," + e);
+            }
 
             putImageAndGotoConfirm();
-            System.out.println("testImg = " + testImg);
         }});
 
         final ImageButton takePhotoButton = findViewById(R.id.imageButton);
@@ -78,50 +80,42 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View v) {
                 if (ContextCompat.checkSelfPermission(MainMenu.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted
-                    System.out.println("Permission is granted.");
                     dispatchTakePictureIntent();
                 } else {
-                    System.out.println("Don't have permission.");
+                    System.out.println("Don't have permission to write external storage.");
                 }
-
-
             }
         });
-
         setUpButtonDarkener();
-
     }
 
+    /* Runs after image is saved from saved.
+    Adds it to gallery, then runs function to put as extra and start next activity. */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        System.out.println("onActivityResult from MainMenu");
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-
             galleryAddPic();
-            System.out.println("Finished galleryAddPic");
-
             putImageAndGotoConfirm();
+        } else {
+            System.out.println("No permission to add to gallery.");
+        }
+    }
 
-        } else {System.out.println("No permission to add to gallery.");} }
 
 
-    String currentPhotoPath;
-
+    /* Puts image saved as an extra and starts PictureTaken activity. */
     private void putImageAndGotoConfirm() {
         Intent intent = new Intent(this, PictureTaken.class);
         intent.putExtra("imagePath", currentPhotoPath);
-        //System.out.println("Intent Made OK");
         startActivity(intent);
-        //System.out.println("Activity made OK");
     }
 
+    /* Creates a file for an image with a unique file path. */
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = getDateTimeInstance().format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        System.out.println("storageDir = " + storageDir);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -134,6 +128,8 @@ public class MainMenu extends AppCompatActivity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
 
+    /* Dispatch the intent to take a picture with the camera.
+    Returns an activity result after the user confirms their picture. */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -146,9 +142,7 @@ public class MainMenu extends AppCompatActivity {
             try {
                 if (ContextCompat.checkSelfPermission(MainMenu.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED) {
-                    System.out.println("Permission was also granted inside intent");
                     photoFile = createImageFile();
-                    System.out.println("ImageFile created");
                 } else {
                     System.out.println("Permission wasn't granted inside dispatchTakePictureIntent");
                 }
@@ -169,6 +163,7 @@ public class MainMenu extends AppCompatActivity {
         }
     }
 
+    /* After an image is saved, this adds it to the user's photo gallery. */
     private void galleryAddPic() {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         File f = new File(currentPhotoPath);
@@ -177,11 +172,10 @@ public class MainMenu extends AppCompatActivity {
         this.sendBroadcast(mediaScanIntent);
     }
 
-    /* Code that makes camera button darker when you press it. */
+    /* Code that makes camera button darker when pressed by user. */
     private void setUpButtonDarkener() {
 
-        ImageView imageView = (ImageView)findViewById(R.id.imageButton);
-
+        ImageView imageView = findViewById(R.id.imageButton);
         imageView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override

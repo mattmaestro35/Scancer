@@ -8,6 +8,7 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,11 +36,17 @@ public class PictureTaken extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picture_taken);
-        System.out.println("AfterPicture activity started");
+
+        /* Invisible until yesUpload is clicked. */
+        final TextView waiting = findViewById(R.id.waiting);
+        waiting.setVisibility(View.GONE);
+
+        /* Get photo path from intent. */
         Intent myIntent = getIntent();
         currentPhotoPath = myIntent.getStringExtra("imagePath");
         setPicDisplay();
 
+        /* Button to not upload and return to main menu. */
         Button noUpload = findViewById(R.id.noUpload);
         noUpload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,40 +55,37 @@ public class PictureTaken extends AppCompatActivity {
             }
         });
 
+        /* Button to upload and proceed to results. */
         Button yesUpload = findViewById(R.id.yesUpload);
         yesUpload.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
 
-                System.out.println("Current photo path = " + currentPhotoPath);
                 File photoFile = new File(currentPhotoPath);
+                /* Set up byte input/output streams to convert image to base64 String. */
                 String encodedString;
-                System.out.println(photoFile + " = photoFile");
                 try {
                     InputStream inputStream = new FileInputStream(photoFile);
-                    System.out.println("input stream OK");
                     byte[] bytes;
                     byte[] buffer = new byte[8192];
                     int bytesRead;
                     ByteArrayOutputStream output = new ByteArrayOutputStream();
-                    System.out.println("Output stream OK");
+
                     try {
                         while ((bytesRead = inputStream.read(buffer)) != -1) {
                             output.write(buffer, 0, bytesRead);
                         }
-                        System.out.println("Byte reading OK");
                     } catch (IOException e) {
                         System.out.println("Byte reading error = " + e);
                         e.printStackTrace();
                     }
+
                     bytes = output.toByteArray();
                     encodedString = Base64.encodeToString(bytes, Base64.DEFAULT);
-                    System.out.println("String encoding OK");
-                    //System.out.println("encoded String = " + encodedString);
+
+                    /* Send server request. */
                     makeJsonObjReq(encodedString);
-
-                    /* send the user to a new activity */
-
+                    waiting.setVisibility(View.VISIBLE);
 
                 } catch (Exception e) {
                     System.out.println("Error when setting up streams, " + e);
@@ -92,12 +96,12 @@ public class PictureTaken extends AppCompatActivity {
         });
     }
 
+    /* Sends encoded string to server. */
     private void makeJsonObjReq(String encodedString) {
-        System.out.println("Making object request.");
         RequestQueue queue = Volley.newRequestQueue(PictureTaken.this);
 
         /*Put server URL here. */
-        String URL = "http://127.0.0.1/post";
+        String URL = "http://10.0.2.2/post";
         JSONObject jsonObj = new JSONObject();
 
         try {
@@ -110,7 +114,7 @@ public class PictureTaken extends AppCompatActivity {
             JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
                     URL, jsonObj,
                     new Response.Listener<JSONObject>() {
-
+                        /* Runs when a response is received from server. */
                         @Override
                         public void onResponse(JSONObject response) {
 
@@ -118,10 +122,10 @@ public class PictureTaken extends AppCompatActivity {
                             newIntent.putExtra("currentPhotoPath", currentPhotoPath);
                             try {
                                 JSONArray results = response.getJSONArray("result");
-                                System.out.println("results = " + results);
+                                /* Unpack the JSONArray response into a set of doubles.
+                                Put the doubles as extras. */
                                 for (int i = 0; i < results.length(); i++) {
                                     double odds = results.getDouble(i);
-                                    //System.out.println("odds = " + odds);
                                     newIntent.putExtra("id" + i, odds);
                                 }
                             } catch (Exception e) {
@@ -130,7 +134,6 @@ public class PictureTaken extends AppCompatActivity {
 
                             startActivity(newIntent);
                             finish();
-                            System.out.println("Server did the thing!");
                             System.out.println("Response = " + response);
                         }
                     }, new Response.ErrorListener() {
@@ -147,32 +150,9 @@ public class PictureTaken extends AppCompatActivity {
 
             System.out.println("exception error jsonobject error = " + e);
         }
-
-
-        {
-
-            /**
-             * Passing some request headers
-             * */
-            /* I don't know what this is or what it does, but it was included in the code
-            I found for JSONObject requests. */
-            /*
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> headers = new HashMap<String, String>();
-                headers.put("Content-Type", "application/json; charset=utf-8");
-                return headers;
-            }
-            */
-
-        };
-
-        // Adding request to request queue
-
-
-
     }
 
+    /* Sets the image display in the middle of the screen. */
     private void setPicDisplay() {
         ImageView picturePreview = findViewById(R.id.picturePreview);
 
