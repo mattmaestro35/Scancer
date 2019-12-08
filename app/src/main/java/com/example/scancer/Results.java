@@ -35,15 +35,19 @@ public class Results extends AppCompatActivity {
         types.add("Vascular Skin Lesion");
         types.add("Basal Cell Carcinoma");
 
-        //for (int i = 0; i < 7; i++) {
-            //double odds = myIntent.getDoubleExtra("id" + i, 0);
-            //textViews Loop
-        //}
-        double odds = myIntent.getDoubleExtra("id0", 0);
-        String output = odds + " " + odds + "%";
-        TextView resultsText = findViewById(R.id.resultText);
-        resultsText.setText(output);
+        //id0 - id6 for doubles
 
+        String output = "";
+        TextView resultView = findViewById(R.id.resultView0);
+        for (int i = 0; i < 7; i++) {
+            double odds = myIntent.getDoubleExtra("id" + i, 0);
+            double roundedOdds = Math.round(odds * 10) / 10;
+            String type = types.get(i);
+            String outputAdd = type + ": " + roundedOdds + "%" + "\n";
+            output = output + outputAdd;
+        }
+
+        resultView.setText(output);
         String currentPhotoPath = myIntent.getStringExtra("currentPhotoPath");
         System.out.println("currentPhotoPath = " + currentPhotoPath);
         Bitmap imageBitmap = BitmapFactory.decodeFile(currentPhotoPath);

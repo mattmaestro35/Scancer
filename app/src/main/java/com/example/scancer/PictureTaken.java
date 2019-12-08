@@ -116,9 +116,11 @@ public class PictureTaken extends AppCompatActivity {
                             Intent newIntent = new Intent(PictureTaken.this, Results.class);
                             newIntent.putExtra("currentPhotoPath", currentPhotoPath);
                             try {
-                                JSONArray results = response.getJSONArray("results");
+                                JSONArray results = response.getJSONArray("result");
+                                System.out.println("results = " + results);
                                 for (int i = 0; i < results.length(); i++) {
                                     double odds = results.getDouble(i);
+                                    //System.out.println("odds = " + odds);
                                     newIntent.putExtra("id" + i, odds);
                                 }
                             } catch (Exception e) {
